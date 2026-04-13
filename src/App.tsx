@@ -154,23 +154,24 @@ export default function App() {
     }
   }, [darkMode]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    const rec = calculateRecommendation(input);
-    setRecommendation(rec);
-    
-    // Get AI Insights
-    const insights = await getSolarInsights(input, rec);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  
+  const rec = calculateRecommendation(input);
+  setRecommendation(rec);
+  setAiInsights(''); // reset
+  
+  // Save to history
+  setHistory(prev => [{ input, rec, date: new Date().toLocaleTimeString() }, ...prev].slice(0, 5));
+  
+  setStep('results');
+  setLoading(false);
+  
+  getSolarInsights(input, rec).then(insights => {
     setAiInsights(insights);
-    
-    // Save to history
-    setHistory(prev => [{ input, rec, date: new Date().toLocaleTimeString() }, ...prev].slice(0, 5));
-    
-    setStep('results');
-    setLoading(false);
-  };
+  });
+};
 
   const chartData = recommendation ? [
     { name: 'Jan', consumption: input.monthlyConsumption, production: Math.round(recommendation.monthlyProduction * 0.8) },
@@ -555,7 +556,7 @@ export default function App() {
       <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 py-8 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-sm text-slate-500">
-            © 2026 SolarWise. Estimates are based on global averages and may vary by specific location and equipment.
+            © 2026 SolarWise.  Estimates are based on global averages and may vary by specific location and equipment.
           </p>
         </div>
       </footer>

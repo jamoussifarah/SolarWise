@@ -1,14 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 import { Recommendation, UserInput } from "./solar-engine";
+import { cache } from "react";
 
 export async function getSolarInsights(input: UserInput, recommendation: Recommendation) {
   const apiKey = process.env.GEMINI_API_KEY;
+  const cacheKey = `${input.location}-${input.monthlyConsumption}-${input.budget}`;
+  const cache = new Map<string, string>();
+
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey)!;
+  }
   if (!apiKey) {
     return "AI insights are currently unavailable. Please configure your Gemini API key.";
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const model = "gemini-3-flash-preview";
+  const model = "gemma-3-4b-it";
 
   const prompt = `
     You are an expert solar energy consultant. 

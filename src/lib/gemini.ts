@@ -1,21 +1,15 @@
 import { GoogleGenAI } from "@google/genai";
 import { Recommendation, UserInput } from "./solar-engine";
-import { cache } from "react";
 
 export async function getSolarInsights(input: UserInput, recommendation: Recommendation) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const cacheKey = `${input.location}-${input.monthlyConsumption}-${input.budget}`;
-  const cache = new Map<string, string>();
-
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)!;
-  }
   if (!apiKey) {
     return "AI insights are currently unavailable. Please configure your Gemini API key.";
   }
 
   const ai = new GoogleGenAI({ apiKey });
   const model = "gemma-3-4b-it";
+
 
   const prompt = `
     You are an expert solar energy consultant. 
@@ -37,9 +31,13 @@ export async function getSolarInsights(input: UserInput, recommendation: Recomme
     
     Please provide:
     1. A brief explanation of why this system was recommended.
-    2. 3 actionable optimization tips to get more out of their investment.
-    3. A **Smart Maintenance Strategy**: Suggest a cleaning and check-up schedule based on their location and panel type.
-    4. An inspiring eco-impact summary (e.g., equivalent number of trees planted).
+    2. **Local Availability & Market Options**: Research and list 2-3 specific solar panel brands and models that are highly available and popular in **${input.location}**. For each, provide:
+       - Brand and Model name.
+       - A brief reason why it's a good choice for this specific region.
+       - A direct purchase link or a specific guidance on where to buy it locally (e.g., "Available at [Retailer Name] in ${input.location}" or a URL like "https://www.google.com/search?q=buy+solar+panels+in+${encodeURIComponent(input.location)}").
+    3. 3 actionable optimization tips to get more out of their investment.
+    4. A **Smart Maintenance Strategy**: Suggest a cleaning and check-up schedule based on their location and panel type.
+    5. An inspiring eco-impact summary (e.g., equivalent number of trees planted).
     
     Format the response in clean Markdown with clear headings. Keep it professional yet encouraging.
   `;
